@@ -517,7 +517,7 @@ if r:
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
     st.markdown(
-        '<div class="section-heading">Results</div>',
+        '<div class="section-heading">Resultados</div>',
         unsafe_allow_html=True
     )
 

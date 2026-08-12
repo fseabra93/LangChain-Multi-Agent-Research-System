@@ -32,7 +32,7 @@ def build_reader_agent():
 
 writer_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are an expert research writer. Write clear, structured and insightful reports."),
-    ("human", """Write a detailed research report on the topic below.
+    ("human", """Write in portuguese PT-BR a detailed research report on the topic below.
 
 Topic: {topic}
 
@@ -66,16 +66,16 @@ Respond in this exact format:
 
 Score: X/10
 
-Strengths:
-- ...
-- ...
+Pontos positivos:
+- ... (em portugues PT-BR)
+- ... (em portugues PT-BR)
 
-Areas to Improve:
-- ...
-- ...
+Pontos a melhorar:
+- ... (em portugues PT-BR)
+- ... (em portugues PT-BR)
 
-One line verdict:
-..."""),
+Veredicto:
+...  (em portugues PT-BR e em uma linha)"""),
 ])
 
 critic_chain = critic_prompt | llm | StrOutputParser()
