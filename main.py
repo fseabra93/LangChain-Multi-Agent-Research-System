@@ -1,11 +1,5 @@
-from src.tools.tools import search_web_tavily, scrape_url
-
-#output = search_web_tavily("Lastest news on AI research")
-#print(output)
+from src.pipelines.pipeline import run_research_pipeline
 
 
-#output = scrape_url("https://ai.google/research")
-
-output = search_web_tavily.invoke("Lastest news on Periodontics research")
-
-print(output)
+topic = "The impact of AI on the job market in 2026"
+run_research_pipeline(topic)

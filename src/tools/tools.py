@@ -1,56 +1,35 @@
-from langchain.tools import tool
+from langchain.tools import tool 
 import requests
 from dotenv import load_dotenv
 import os
 from tavily import TavilyClient
-# pyrefly: ignore [missing-import]
-from rich import print as rprint
-from langchain_openai import ChatOpenAI
-
+from rich import print
 from bs4 import BeautifulSoup
-# pyrefly: ignore [missing-import]
 from readability import Document
-# pyrefly: ignore [missing-import]
 import trafilatura
-import re
+import re 
 
 
 load_dotenv()
-tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+
+tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
 @tool
-def search_web_tavily(query: str) -> str:
-    """Searches the web using Tavily search engine and translates the results to Portuguese (pt-br).
-    Args:
-        query: Search query
-    Returns:
-        A string containing the search results translated to pt-br
-    """
-    try:
-        response = tavily_client.search(query=query, max_results=5)
+def web_search(query : str) -> str:
+    """Search the web for recent and reliable information on a topic . Returns Titles , URLs and snippets."""
+    results = tavily.search(query=query,max_results=5)
 
-        out = []
+    out = []
 
-        for r in response['results']:
-            out.append(
-                f"Title: {r['title']}\nUrl: {r['url']}\nSnippet: {r['content'][:300]}...\n"
-            )
-            
-        joined_results = "\n----\n".join(out)
-        
-        # Traduzir os resultados usando o modelo ChatOpenAI
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        translation_prompt = (
-            "Você é um assistente de tradução profissional. Traduza os seguintes resultados de busca na web para o Português do Brasil (pt-br).\n"
-            "Mantenha a formatação original com 'Title:', 'Url:' e 'Snippet:'.\n"
-            "Traduza os títulos (Title) e os trechos (Snippet), mas NÃO altere ou traduza os links/URLs (Url).\n\n"
-            f"{joined_results}"
+    for r in results['results']:
+        out.append(
+            f"Title: {r['title']}\nURL: {r['url']}\nSnippet: {r['content'][:300]}\n"
         )
-        translated_response = llm.invoke(translation_prompt)
-        return translated_response.content
-    except Exception as e:
-        return f"Error searching web: {e}"  
+    
+    return "\n----\n".join(out)
 
+   
+    
 
 @tool
 def scrape_url(url: str) -> str:
@@ -70,7 +49,7 @@ def scrape_url(url: str) -> str:
     }
 
     try:
-        # ─── Fetch page ───────────────────────────────────────────────────────────
+        # ── Fetch page ─────────────────────────────────────
         response = requests.get(
             url,
             headers=headers,
@@ -81,9 +60,9 @@ def scrape_url(url: str) -> str:
 
         html = response.text
 
-        # ──────────────────────────────────────────────────────────────────────────
-        # Strategy 1 -> trafilatura (BEST for articles/blogs)
-        # ──────────────────────────────────────────────────────────────────────────
+        # ──────────────────────────────────────────────────
+        # Strategy 1 → trafilatura (BEST for articles/blogs)
+        # ──────────────────────────────────────────────────
         extracted = trafilatura.extract(
             html,
             include_comments=False,
@@ -94,9 +73,9 @@ def scrape_url(url: str) -> str:
             cleaned = re.sub(r'\s+', ' ', extracted)
             return cleaned[:5000]
 
-        # ──────────────────────────────────────────────────────────────────────────
-        # Strategy 2 -> readability
-        # ──────────────────────────────────────────────────────────────────────────
+        # ──────────────────────────────────────────────────
+        # Strategy 2 → readability
+        # ──────────────────────────────────────────────────
         doc = Document(html)
         clean_html = doc.summary()
 
@@ -119,9 +98,9 @@ def scrape_url(url: str) -> str:
             cleaned = re.sub(r'\s+', ' ', text)
             return cleaned[:5000]
 
-        # ──────────────────────────────────────────────────────────────────────────
-        # Strategy 3 -> fallback full page extraction
-        # ──────────────────────────────────────────────────────────────────────────
+        # ──────────────────────────────────────────────────
+        # Strategy 3 → fallback full page extraction
+        # ──────────────────────────────────────────────────
         soup = BeautifulSoup(html, "html.parser")
 
         for tag in soup([

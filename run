@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+import sys
+from streamlit.web import cli as stcli
+
+if __name__ == '__main__':
+    # Reconstruct arguments to match what streamlit cli expects:
+    # ['streamlit', 'run', 'app.py']
+    sys.argv = ['streamlit', 'run'] + sys.argv[1:]
+    sys.exit(stcli.main())
